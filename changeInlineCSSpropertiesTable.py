@@ -73,7 +73,6 @@ def addCSSproperties():
     return tdNewArgument
 
 with open(output_file, 'wt') as fout:
-    fout.write('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<title>Document</title>\n</head>\n<body>\n')
     for line in strippedLines:
         if 'rowspan' in line or 'colspan' in line:
             fout.write(addCSSproperties() + '\n')
