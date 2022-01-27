@@ -18,13 +18,12 @@
 #     </tr>
 # </table>
 # ...
-# CONCLUSION: It is strongly recommended to reference an external CSS stylesheet.
+# CONCLUSION: It is strongly recommended to reference to an external CSS stylesheet.
 
 import os
 from pathlib import Path
 
 class DirMgmt:
-
     def __init__(self):
         pass
 
@@ -33,52 +32,59 @@ class DirMgmt:
         os.chdir(dirName)
         return Path.cwd()
 
+class AddInternalCSS:
+    def __init__(self):
+        self.lines = []
+        self.strippedLines = []
+        self.tdArgument = ''
+        self.tdStyle = 'style="padding:0px;margin:0px;border-collapse:collapse;box-sizing:content-box;border-spacing:0px;vertical-align:middle;line-height:0px;'
+        self.output_file = 'newHTML.html'
+
+    def readHTML(self):
+        with open('index.html', 'rt', encoding='utf-8') as html:
+            for line in html:
+                self.lines.append(line)
+        # Remove newline and tabulator:
+        for line in self.lines:
+            line = line.strip('\n')
+            line = line.strip('\t')
+            self.strippedLines.append(line)
+        # Remove the output file, if it exists:
+        if os.path.exists(os.path.join(Path.cwd(), self.output_file)):
+            os.remove(os.path.join(Path.cwd(), self.output_file))
+
+    def addCSSproperties(self, line):
+        widthStart = line.find('width')
+        heightStart = line.find('height')
+        findAltStart = line.find('alt')
+        widthEnd = heightStart - 1
+        heightEnd = findAltStart - 1
+        widthArgument = line[widthStart:widthEnd]
+        widthArgument = widthArgument.replace('"', '')
+        widthArgument = widthArgument.replace('=', ':')
+        heightArgument = line[heightStart:heightEnd]
+        heightArgument = heightArgument.replace('"', '')
+        heightArgument = heightArgument.replace('=', ':')
+        tdArgumentLeft = line.find('><img') - 1
+        tdNewArgument = line[0:tdArgumentLeft + 1] + ' ' +  self.tdStyle + widthArgument + ';' + heightArgument + '"' + line[tdArgumentLeft+1:]
+        return tdNewArgument
+    
+    def writeCSS(self):
+        with open(self.output_file, 'wt') as fout:
+            for line in self.strippedLines:
+                if 'rowspan' in line or 'colspan' in line:
+                    fout.write(self.addCSSproperties(line) + '\n')
+                elif '<td>' in line and not 'rowspan' in line or '<td>' in line and not 'colspan' in line:
+                    fout.write(self.addCSSproperties(line) + '\n')
+                else:
+                    fout.write(line + '\n')
+            fout.write('</body>\n</html>')
+        fout.close()
+
+# Change working directory:
 oCreateDirectories = DirMgmt()
 oCreateDirectories.checkDir()
-
-lines = []
-strippedLines = []
-
-tdArgument = ''
-tdStyle = 'style="padding:0px;margin:0px;border-collapse:collapse;box-sizing:content-box;border-spacing:0px;vertical-align:middle;line-height:0px;'
-
-with open('index.html', 'rt', encoding='utf-8') as html:
-    for line in html:
-        lines.append(line)
-
-for line in lines:
-    line = line.strip('\n')
-    line = line.strip('\t')
-    strippedLines.append(line)
-
-output_file = 'newHTML.html'
-
-if os.path.exists(os.path.join(Path.cwd(), output_file)):
-    os.remove(os.path.join(Path.cwd(), output_file))
-
-def addCSSproperties():
-    widthStart = line.find('width')
-    heightStart = line.find('height')
-    findAltStart = line.find('alt')
-    widthEnd = heightStart - 1
-    heightEnd = findAltStart - 1
-    widthArgument = line[widthStart:widthEnd]
-    widthArgument = widthArgument.replace('"', '')
-    widthArgument = widthArgument.replace('=', ':')
-    heightArgument = line[heightStart:heightEnd]
-    heightArgument = heightArgument.replace('"', '')
-    heightArgument = heightArgument.replace('=', ':')
-    tdArgumentLeft = line.find('><img') - 1
-    tdNewArgument = line[0:tdArgumentLeft + 1] + ' ' +  tdStyle + widthArgument + ';' + heightArgument + '"' + line[tdArgumentLeft+1:]
-    return tdNewArgument
-
-with open(output_file, 'wt') as fout:
-    for line in strippedLines:
-        if 'rowspan' in line or 'colspan' in line:
-            fout.write(addCSSproperties() + '\n')
-        elif '<td>' in line and not 'rowspan' in line or '<td>' in line and not 'colspan' in line:
-            fout.write(addCSSproperties() + '\n')
-        else:
-            fout.write(line + '\n')
-    fout.write('</body>\n</html>')
-fout.close()
+# Perform internal CSS adaptation:
+oAddInternalCSS = AddInternalCSS()
+oAddInternalCSS.readHTML()
+oAddInternalCSS.writeCSS()
