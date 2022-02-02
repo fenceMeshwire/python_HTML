@@ -28,7 +28,7 @@ class DirMgmt:
         pass
 
     def checkDir(self):
-        dirName = '...' # Current working directory goes here
+        dirName = 'C:\\...' # Current working directory goes here
         os.chdir(dirName)
         return Path.cwd()
 
@@ -66,7 +66,7 @@ class AddInternalCSS:
         heightArgument = heightArgument.replace('"', '')
         heightArgument = heightArgument.replace('=', ':')
         tdArgumentLeft = line.find('><img') - 1
-        tdNewArgument = line[0:tdArgumentLeft + 1] + ' ' +  self.tdStyle + widthArgument + ';' + heightArgument + '"' + line[tdArgumentLeft+1:]
+        tdNewArgument = line[0:tdArgumentLeft + 1] + ' ' +  self.tdStyle + widthArgument + ';' + heightArgument + ';"' + line[tdArgumentLeft+1:]
         return tdNewArgument
     
     def writeCSS(self):
@@ -78,7 +78,6 @@ class AddInternalCSS:
                     fout.write(self.addCSSproperties(line) + '\n')
                 else:
                     fout.write(line + '\n')
-            fout.write('</body>\n</html>')
         fout.close()
 
 # Change working directory:
